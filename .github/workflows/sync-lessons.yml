@@ -1,0 +1,46 @@
+name: Sync Lessons (Preserve Changes)
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+    inputs:
+      lesson_name:
+        description: 'Specific lesson to sync (leave empty for all)'
+        required: false
+        default: ''
+
+jobs:
+  sync-lessons:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+      
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: Make scripts executable
+        run: chmod +x scripts/*.sh
+      
+      - name: Sync lessons
+        run: |
+          if [ -n "${{ github.event.inputs.lesson_name }}" ]; then
+            ./scripts/sync-lesson.sh "${{ github.event.inputs.lesson_name }}"
+          else
+            ./scripts/sync-lesson.sh --all
+          fi
+      
+      - name: Push changes
+        run: |
+          if [[ -n $(git status -s) ]]; then
+            git add .
+            git commit -m "Auto-sync lessons [skip ci]"
+            git push origin main
+          fi

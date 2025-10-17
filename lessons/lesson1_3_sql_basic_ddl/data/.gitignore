@@ -1,0 +1,6 @@
+*
+!.gitignore
+!classes.csv
+!students.csv
+!teachers.csv
+!import.sql

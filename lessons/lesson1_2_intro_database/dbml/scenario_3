@@ -1,0 +1,39 @@
+Table customers {
+  id int [pk, increment]
+  name varchar
+  email varchar
+  address varchar
+  phone varchar
+}
+
+Table movies {
+  id int [pk, increment]
+  title varchar
+  description text
+  price decimal
+  release_year int
+  genre varchar
+}
+
+Table orders {
+  id int [pk, increment]
+  customer_id int
+  order_date datetime
+  total_amount decimal
+  status varchar
+}
+
+Table order_items {
+  order_id int
+  movie_id int
+  quantity int
+  price decimal
+  
+  indexes {
+    (order_id, movie_id) [pk]
+  }
+}
+
+Ref: orders.customer_id > customers.id // many-to-one
+Ref: order_items.order_id > orders.id // many-to-one
+Ref: order_items.movie_id > movies.id // many-to-one

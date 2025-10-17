@@ -1,0 +1,321 @@
+{
+  "lessons": [
+    {
+      "folder": "lesson1_1_intro_data_science",
+      "name": "intro_data_science",
+      "number": "1_1",
+      "source_repo": "https://github.com/azniosman/5m-data-1.1-intro-data-science.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "Introduction to Data Science",
+      "module": "1",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson1_2_intro_database",
+      "name": "intro_database",
+      "number": "1_2",
+      "source_repo": "https://github.com/azniosman/5m-data-1.2-intro-database.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "Introduction to Databases",
+      "module": "1",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson1_3_sql_basic_ddl",
+      "name": "sql_basic_ddl",
+      "number": "1_3",
+      "source_repo": "https://github.com/azniosman/5m-data-1.3-sql-basic-ddl.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "SQL Basic DDL",
+      "module": "1",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson1_4_sql_basic_dml",
+      "name": "sql_basic_dml",
+      "number": "1_4",
+      "source_repo": "https://github.com/azniosman/5m-data-1.4-sql-basic-dml.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "SQL Basic DML",
+      "module": "1",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson1_5_sql_advanced",
+      "name": "sql_advanced",
+      "number": "1_5",
+      "source_repo": "https://github.com/azniosman/5m-data-1.5-sql-advanced.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "SQL Advanced",
+      "module": "1",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson1_6_intro_numpy",
+      "name": "intro_numpy",
+      "number": "1_6",
+      "source_repo": "https://github.com/azniosman/5m-data-1.6-intro-numpy.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "Introduction to NumPy",
+      "module": "1",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson1_7_intro_pandas",
+      "name": "intro_pandas",
+      "number": "1_7",
+      "source_repo": "https://github.com/azniosman/5m-data-1.7-intro-pandas.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "Introduction to Pandas",
+      "module": "1",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson1_8_eda_basic",
+      "name": "eda_basic",
+      "number": "1_8",
+      "source_repo": "https://github.com/azniosman/5m-data-1.8-eda-basic.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "EDA Basic",
+      "module": "1",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson1_9_eda_advanced",
+      "name": "eda_advanced",
+      "number": "1_9",
+      "source_repo": "https://github.com/azniosman/5m-data-1.9-eda-advanced.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "EDA Advanced",
+      "module": "1",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson2_1_intro_big_data_eng",
+      "name": "intro_big_data_eng",
+      "number": "2_1",
+      "source_repo": "https://github.com/azniosman/5m-data-2.1-intro-big-data-eng.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "Introduction to Big Data Engineering",
+      "module": "2",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson2_2_data_architecture",
+      "name": "data_architecture",
+      "number": "2_2",
+      "source_repo": "https://github.com/azniosman/5m-data-2.2-data-architecture.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "Data Architecture",
+      "module": "2",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson2_3_data_encoding_creation_flow",
+      "name": "data_encoding_creation_flow",
+      "number": "2_3",
+      "source_repo": "https://github.com/azniosman/5m-data-2.3-data-encoding-creation-flow.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "Data Encoding Creation Flow",
+      "module": "2",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson2_4_data_extraction_scraping",
+      "name": "data_extraction_scraping",
+      "number": "2_4",
+      "source_repo": "https://github.com/azniosman/5m-data-2.4-data-extraction-scraping.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "Data Extraction and Scraping",
+      "module": "2",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson2_5_data_warehouse",
+      "name": "data_warehouse",
+      "number": "2_5",
+      "source_repo": "https://github.com/azniosman/5m-data-2.5-data-warehouse.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "Data Warehouse",
+      "module": "2",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson2_6_data_pipelines_orchestration",
+      "name": "data_pipelines_orchestration",
+      "number": "2_6",
+      "source_repo": "https://github.com/azniosman/5m-data-2.6-data-pipelines-orchestration.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "Data Pipelines Orchestration",
+      "module": "2",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson2_7_data_orchestration_testing",
+      "name": "data_orchestration_testing",
+      "number": "2_7",
+      "source_repo": "https://github.com/azniosman/5m-data-2.7-data-orchestration-testing.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "Data Orchestration Testing",
+      "module": "2",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson2_8_out_of_core_computation",
+      "name": "out_of_core_computation",
+      "number": "2_8",
+      "source_repo": "https://github.com/azniosman/5m-data-2.8-out-of-core-computation.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "Out of Core Computation",
+      "module": "2",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson2_9_distributed_batch",
+      "name": "distributed_batch",
+      "number": "2_9",
+      "source_repo": "https://github.com/azniosman/5m-data-2.9-distributed-batch.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "Distributed Batch Processing",
+      "module": "2",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson3_1_probability_statistics",
+      "name": "probability_statistics",
+      "number": "3_1",
+      "source_repo": "https://github.com/azniosman/5m-data-3.1-probability-statistics.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "Probability and Statistics",
+      "module": "3",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson3_2_intro_machine_learning",
+      "name": "intro_machine_learning",
+      "number": "3_2",
+      "source_repo": "https://github.com/azniosman/5m-data-3.2-intro-machine-learning.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "Introduction to Machine Learning",
+      "module": "3",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson3_3_supervised_learning",
+      "name": "supervised_learning",
+      "number": "3_3",
+      "source_repo": "https://github.com/azniosman/5m-data-3.3-supervised-learning.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "Supervised Learning",
+      "module": "3",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson3_4_supervised_learning_advanced",
+      "name": "supervised_learning_advanced",
+      "number": "3_4",
+      "source_repo": "https://github.com/azniosman/5m-data-3.4-supervised-learning-advanced.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "Supervised Learning Advanced",
+      "module": "3",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson3_5_unsupervised_learning",
+      "name": "unsupervised_learning",
+      "number": "3_5",
+      "source_repo": "https://github.com/azniosman/5m-data-3.5-unsupervised-learning.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "Unsupervised Learning",
+      "module": "3",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson3_6_time_series_forecasting",
+      "name": "time_series_forecasting",
+      "number": "3_6",
+      "source_repo": "https://github.com/azniosman/5m-data-3.6-time-series-forecasting.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "Time Series Forecasting",
+      "module": "3",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson3_7_neural_network_deep_learning",
+      "name": "neural_network_deep_learning",
+      "number": "3_7",
+      "source_repo": "https://github.com/azniosman/5m-data-3.7-neural-network-deep-learning.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "Neural Networks and Deep Learning",
+      "module": "3",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson3_8_computer_vision",
+      "name": "computer_vision",
+      "number": "3_8",
+      "source_repo": "https://github.com/azniosman/5m-data-3.8-computer-vision.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "Computer Vision",
+      "module": "3",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson3_9_nlp",
+      "name": "nlp",
+      "number": "3_9",
+      "source_repo": "https://github.com/azniosman/5m-data-3.9-nlp.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "Natural Language Processing",
+      "module": "3",
+      "has_custom_changes": false
+    },
+    {
+      "folder": "lesson3_10_nlp_advanced",
+      "name": "nlp_advanced",
+      "number": "3_10",
+      "source_repo": "https://github.com/azniosman/5m-data-3.10-nlp-advanced.git",
+      "added_date": "2025-10-17",
+      "last_synced": "2025-10-17",
+      "description": "NLP Advanced",
+      "module": "3",
+      "has_custom_changes": false
+    }
+  ],
+  "last_updated": "2025-10-17T10:12:31.929901Z",
+  "version": "1.0.0",
+  "preservation_patterns": [
+    "*.local.*",
+    "*-custom.*",
+    "*-notes.*",
+    "my-*",
+    "custom-*/"
+  ]
+}

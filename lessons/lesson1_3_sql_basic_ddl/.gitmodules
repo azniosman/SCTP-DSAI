@@ -1,0 +1,3 @@
+[submodule "lessons/data-1.3-sql-basic-ddl"]
+	path = lessons/data-1.3-sql-basic-ddl
+	url = https://github.com/azniosman/5m-data-1.3-sql-basic-ddl.git
