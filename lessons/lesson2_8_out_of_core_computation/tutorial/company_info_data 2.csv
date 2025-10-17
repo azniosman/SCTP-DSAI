@@ -1,0 +1,9 @@
+symbol,company_name,sector,market_cap,employees
+AAPL,Apple Inc.,Consumer Discretionary,1730,153070
+MSFT,Microsoft Corporation,Communication Services,1498,72525
+GOOGL,Alphabet Inc.,Technology,2585,194726
+AMZN,Amazon.com Inc.,Technology,1075,152191
+TSLA,Tesla Inc.,Consumer Discretionary,2779,26831
+META,Meta Platforms Inc.,Technology,1512,91883
+NVDA,NVIDIA Corporation,Technology,1652,46051
+NFLX,Netflix Inc.,Communication Services,1502,116308
