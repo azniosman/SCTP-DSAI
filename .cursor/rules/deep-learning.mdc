@@ -1,0 +1,1010 @@
+---
+description: Expert deep learning, transformers, diffusion models, and LLM development with PyTorch, Diffusers, Transformers, and Gradio
+globs: **/*.py, **/*.ipynb, **/*.pynb, **/*.yaml, **/*.yml
+alwaysApply: false
+---
+
+# Deep Learning and LLM Development Expert
+
+You are an expert in deep learning, transformers, diffusion models, and LLM development, with a focus on Python libraries such as PyTorch, Diffusers, Transformers, and Gradio.
+
+## Core Principles
+
+- Write concise, technical responses with accurate Python examples
+- Prioritize clarity, efficiency, and best practices in deep learning workflows
+- Use object-oriented programming for model architectures and functional programming for data processing pipelines
+- Implement proper GPU utilization and mixed precision training when applicable
+- Use descriptive variable names that reflect the components they represent (e.g., `attention_heads`, `embedding_dim`, `hidden_states`)
+- Follow PEP 8 style guidelines for Python code
+- Include type hints for function signatures to improve code clarity
+- Write docstrings for all functions using Google or NumPy style
+- Prioritize memory efficiency and computational performance
+
+## Project Structure and Organization
+
+### Directory Structure
+```
+project_root/
+├── config/
+│   ├── model_config.yaml
+│   ├── training_config.yaml
+│   └── inference_config.yaml
+├── data/
+│   ├── raw/                  # Original datasets
+│   ├── processed/            # Preprocessed data
+│   └── cache/                # HuggingFace cache
+├── src/
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── base.py           # Base model classes
+│   │   ├── transformer.py    # Transformer architectures
+│   │   └── diffusion.py      # Diffusion model implementations
+│   ├── data/
+│   │   ├── __init__.py
+│   │   ├── dataset.py        # Custom dataset classes
+│   │   ├── dataloader.py     # DataLoader configurations
+│   │   └── preprocessing.py  # Data preprocessing functions
+│   ├── training/
+│   │   ├── __init__.py
+│   │   ├── trainer.py        # Training loop
+│   │   ├── loss.py           # Custom loss functions
+│   │   └── metrics.py        # Evaluation metrics
+│   ├── inference/
+│   │   ├── __init__.py
+│   │   ├── pipeline.py       # Inference pipelines
+│   │   └── utils.py          # Utility functions
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   ├── config.py         # Configuration management
+│   │   ├── logger.py         # Logging utilities
+│   │   └── checkpoint.py     # Model checkpointing
+│   └── app/
+│       ├── __init__.py
+│       └── gradio_app.py     # Gradio interface
+├── notebooks/
+│   ├── 01_data_exploration.ipynb
+│   ├── 02_model_training.ipynb
+│   └── 03_inference_demo.ipynb
+├── tests/
+│   ├── unit/
+│   └── integration/
+├── scripts/
+│   ├── train.py             # Training script
+│   ├── evaluate.py          # Evaluation script
+│   └── deploy.py            # Deployment script
+├── requirements.txt
+├── .env.example
+└── README.md
+```
+
+### File Naming Conventions
+- Use snake_case for all Python files and variables
+- Use descriptive names that indicate purpose (e.g., `bert_fine_tuner.py`, `stable_diffusion_pipeline.py`)
+- Configuration files should use YAML format for readability
+
+## Deep Learning and Model Development
+
+### PyTorch Best Practices
+
+**Custom Model Architecture:**
+```python
+import torch
+import torch.nn as nn
+from typing import Optional, Tuple
+
+class CustomTransformerBlock(nn.Module):
+    """
+    A custom transformer block with optional mixed precision support.
+    
+    Args:
+        hidden_size: Dimensionality of the hidden representations
+        num_attention_heads: Number of attention heads
+        intermediate_size: Dimensionality of the intermediate layer
+        attention_dropout: Dropout rate for attention layers
+        hidden_dropout: Dropout rate for hidden layers
+    """
+    
+    def __init__(
+        self,
+        hidden_size: int,
+        num_attention_heads: int,
+        intermediate_size: int,
+        attention_dropout: float = 0.1,
+        hidden_dropout: float = 0.1,
+    ):
+        super().__init__()
+        
+        self.attention = nn.MultiheadAttention(
+            embed_dim=hidden_size,
+            num_heads=num_attention_heads,
+            dropout=attention_dropout,
+            batch_first=True
+        )
+        
+        self.norm1 = nn.LayerNorm(hidden_size)
+        self.norm2 = nn.LayerNorm(hidden_size)
+        
+        self.ffn = nn.Sequential(
+            nn.Linear(hidden_size, intermediate_size),
+            nn.GELU(),
+            nn.Dropout(hidden_dropout),
+            nn.Linear(intermediate_size, hidden_size),
+            nn.Dropout(hidden_dropout)
+        )
+    
+    def forward(
+        self,
+        hidden_states: torch.Tensor,
+        attention_mask: Optional[torch.Tensor] = None
+    ) -> torch.Tensor:
+        """
+        Forward pass through the transformer block.
+        
+        Args:
+            hidden_states: Input hidden states of shape (batch_size, seq_len, hidden_size)
+            attention_mask: Optional attention mask
+            
+        Returns:
+            Output tensor of same shape as input
+        """
+        # Self-attention with residual connection
+        attn_output, _ = self.attention(
+            hidden_states,
+            hidden_states,
+            hidden_states,
+            attn_mask=attention_mask
+        )
+        hidden_states = self.norm1(hidden_states + attn_output)
+        
+        # Feed-forward with residual connection
+        ffn_output = self.ffn(hidden_states)
+        hidden_states = self.norm2(hidden_states + ffn_output)
+        
+        return hidden_states
+```
+
+**Proper Weight Initialization:**
+```python
+def initialize_weights(model: nn.Module) -> None:
+    """
+    Initialize model weights using appropriate techniques.
+    
+    Args:
+        model: PyTorch model to initialize
+    """
+    for module in model.modules():
+        if isinstance(module, nn.Linear):
+            nn.init.xavier_uniform_(module.weight)
+            if module.bias is not None:
+                nn.init.constant_(module.bias, 0)
+        elif isinstance(module, (nn.LayerNorm, nn.BatchNorm1d, nn.BatchNorm2d)):
+            nn.init.constant_(module.weight, 1)
+            nn.init.constant_(module.bias, 0)
+        elif isinstance(module, nn.Embedding):
+            nn.init.normal_(module.weight, mean=0, std=0.02)
+```
+
+## Transformers and LLMs
+
+### Fine-Tuning with LoRA and P-tuning
+
+**LoRA Implementation:**
+```python
+from peft import LoraConfig, get_peft_model
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+def create_lora_model(
+    model_name: str,
+    lora_r: int = 8,
+    lora_alpha: int = 32,
+    lora_dropout: float = 0.05,
+    target_modules: list = None
+):
+    """
+    Create a model with LoRA adapters for efficient fine-tuning.
+    
+    Args:
+        model_name: HuggingFace model identifier
+        lora_r: LoRA rank
+        lora_alpha: LoRA scaling factor
+        lora_dropout: Dropout rate for LoRA
+        target_modules: Modules to apply LoRA to
+        
+    Returns:
+        Model with LoRA adapters
+    """
+    if target_modules is None:
+        target_modules = ["q_proj", "v_proj"]
+    
+    # Load base model
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name,
+        torch_dtype=torch.float16,
+        device_map="auto"
+    )
+    
+    # Configure LoRA
+    lora_config = LoraConfig(
+        r=lora_r,
+        lora_alpha=lora_alpha,
+        target_modules=target_modules,
+        lora_dropout=lora_dropout,
+        bias="none",
+        task_type="CAUSAL_LM"
+    )
+    
+    # Apply LoRA
+    model = get_peft_model(model, lora_config)
+    
+    # Print trainable parameters
+    model.print_trainable_parameters()
+    
+    return model
+```
+
+**Tokenization Best Practices:**
+```python
+from transformers import AutoTokenizer
+from typing import Dict, List
+
+def tokenize_batch(
+    texts: List[str],
+    tokenizer,
+    max_length: int = 512,
+    padding: str = "max_length",
+    truncation: bool = True
+) -> Dict[str, torch.Tensor]:
+    """
+    Tokenize a batch of texts with proper handling.
+    
+    Args:
+        texts: List of text strings
+        tokenizer: Tokenizer instance
+        max_length: Maximum sequence length
+        padding: Padding strategy
+        truncation: Whether to truncate sequences
+        
+    Returns:
+        Dictionary of tokenized inputs
+    """
+    encodings = tokenizer(
+        texts,
+        max_length=max_length,
+        padding=padding,
+        truncation=truncation,
+        return_tensors="pt"
+    )
+    
+    return encodings
+```
+
+## Diffusion Models
+
+### Diffusion Pipeline Implementation
+
+**Noise Scheduler and Sampling:**
+```python
+from diffusers import StableDiffusionPipeline, DDIMScheduler
+import torch
+
+def create_diffusion_pipeline(
+    model_id: str = "runwayml/stable-diffusion-v1-5",
+    scheduler_type: str = "ddim",
+    num_inference_steps: int = 50
+):
+    """
+    Create a diffusion pipeline with specified scheduler.
+    
+    Args:
+        model_id: HuggingFace model identifier
+        scheduler_type: Type of scheduler (ddim, pndm, euler, etc.)
+        num_inference_steps: Number of diffusion steps
+        
+    Returns:
+        Configured diffusion pipeline
+    """
+    if scheduler_type == "ddim":
+        scheduler = DDIMScheduler.from_pretrained(
+            model_id,
+            subfolder="scheduler"
+        )
+    
+    pipeline = StableDiffusionPipeline.from_pretrained(
+        model_id,
+        scheduler=scheduler,
+        torch_dtype=torch.float16,
+        safety_checker=None  # For faster inference during development
+    )
+    
+    pipeline = pipeline.to("cuda")
+    pipeline.enable_attention_slicing()  # Reduce memory usage
+    
+    return pipeline
+
+def generate_images(
+    pipeline,
+    prompt: str,
+    negative_prompt: str = "",
+    num_images: int = 1,
+    guidance_scale: float = 7.5,
+    num_inference_steps: int = 50,
+    seed: int = None
+) -> list:
+    """
+    Generate images using the diffusion pipeline.
+    
+    Args:
+        pipeline: Diffusion pipeline instance
+        prompt: Text prompt for generation
+        negative_prompt: Text to avoid in generation
+        num_images: Number of images to generate
+        guidance_scale: Guidance scale for classifier-free guidance
+        num_inference_steps: Number of diffusion steps
+        seed: Random seed for reproducibility
+        
+    Returns:
+        List of generated PIL images
+    """
+    if seed is not None:
+        torch.manual_seed(seed)
+    
+    with torch.autocast("cuda"):
+        images = pipeline(
+            prompt=prompt,
+            negative_prompt=negative_prompt,
+            num_images_per_prompt=num_images,
+            guidance_scale=guidance_scale,
+            num_inference_steps=num_inference_steps,
+            height=512,
+            width=512
+        ).images
+    
+    return images
+```
+
+## Model Training and Evaluation
+
+### Training Loop with Advanced Features
+
+**Trainer Implementation:**
+```python
+import torch
+import logging
+from tqdm import tqdm
+from torch.optim import AdamW
+from torch.optim.lr_scheduler import CosineAnnealingLR
+from typing import Dict, Optional
+
+logger = logging.getLogger(__name__)
+
+class ModelTrainer:
+    """
+    Advanced trainer with mixed precision, gradient accumulation, and checkpointing.
+    """
+    
+    def __init__(
+        self,
+        model: nn.Module,
+        train_dataloader,
+        val_dataloader,
+        learning_rate: float = 1e-4,
+        num_epochs: int = 3,
+        gradient_accumulation_steps: int = 1,
+        max_grad_norm: float = 1.0,
+        device: str = "cuda",
+        use_amp: bool = True
+    ):
+        self.model = model
+        self.train_dataloader = train_dataloader
+        self.val_dataloader = val_dataloader
+        self.device = device
+        self.num_epochs = num_epochs
+        self.gradient_accumulation_steps = gradient_accumulation_steps
+        self.max_grad_norm = max_grad_norm
+        self.use_amp = use_amp
+        
+        self.model.to(device)
+        self.optimizer = AdamW(model.parameters(), lr=learning_rate)
+        self.scheduler = CosineAnnealingLR(
+            self.optimizer,
+            T_max=len(train_dataloader) * num_epochs
+        )
+        self.scaler = torch.cuda.amp.GradScaler() if use_amp else None
+    
+    def train_epoch(self) -> float:
+        """Train for one epoch with gradient accumulation."""
+        self.model.train()
+        total_loss = 0
+        
+        for step, batch in enumerate(tqdm(self.train_dataloader)):
+            batch = {k: v.to(self.device) for k, v in batch.items()}
+            
+            # Mixed precision forward pass
+            if self.use_amp:
+                with torch.autocast(device_type="cuda", dtype=torch.float16):
+                    outputs = self.model(**batch)
+                    loss = outputs.loss / self.gradient_accumulation_steps
+                
+                self.scaler.scale(loss).backward()
+            else:
+                outputs = self.model(**batch)
+                loss = outputs.loss / self.gradient_accumulation_steps
+                loss.backward()
+            
+            total_loss += loss.item()
+            
+            # Gradient accumulation
+            if (step + 1) % self.gradient_accumulation_steps == 0:
+                if self.use_amp:
+                    self.scaler.unscale_(self.optimizer)
+                
+                # Gradient clipping
+                torch.nn.utils.clip_grad_norm_(
+                    self.model.parameters(),
+                    self.max_grad_norm
+                )
+                
+                if self.use_amp:
+                    self.scaler.step(self.optimizer)
+                    self.scaler.update()
+                else:
+                    self.optimizer.step()
+                
+                self.optimizer.zero_grad()
+                self.scheduler.step()
+        
+        return total_loss / len(self.train_dataloader)
+    
+    def validate(self) -> float:
+        """Validation loop."""
+        self.model.eval()
+        total_loss = 0
+        
+        with torch.no_grad():
+            for batch in tqdm(self.val_dataloader):
+                batch = {k: v.to(self.device) for k, v in batch.items()}
+                
+                with torch.autocast(device_type="cuda", dtype=torch.float16):
+                    outputs = self.model(**batch)
+                    loss = outputs.loss
+                
+                total_loss += loss.item()
+        
+        return total_loss / len(self.val_dataloader)
+```
+
+### Efficient Data Loading
+
+```python
+from torch.utils.data import DataLoader, Dataset
+import torch
+
+class CustomDataset(Dataset):
+    """
+    Efficient dataset with proper caching and preprocessing.
+    """
+    
+    def __init__(
+        self,
+        data: list,
+        tokenizer,
+        max_length: int = 512,
+        cache_features: bool = True
+    ):
+        self.data = data
+        self.tokenizer = tokenizer
+        self.max_length = max_length
+        self.cache = {} if cache_features else None
+    
+    def __len__(self) -> int:
+        return len(self.data)
+    
+    def __getitem__(self, idx: int) -> dict:
+        if self.cache is not None and idx in self.cache:
+            return self.cache[idx]
+        
+        item = self.data[idx]
+        
+        # Tokenize with proper handling
+        encodings = self.tokenizer(
+            item["text"],
+            max_length=self.max_length,
+            padding="max_length",
+            truncation=True,
+            return_tensors="pt"
+        )
+        
+        batch = {
+            "input_ids": encodings["input_ids"].squeeze(),
+            "attention_mask": encodings["attention_mask"].squeeze(),
+            "labels": encodings["input_ids"].squeeze()
+        }
+        
+        if self.cache is not None:
+            self.cache[idx] = batch
+        
+        return batch
+
+def create_dataloader(
+    dataset: Dataset,
+    batch_size: int = 32,
+    shuffle: bool = True,
+    num_workers: int = 4,
+    pin_memory: bool = True
+) -> DataLoader:
+    """
+    Create optimized DataLoader with async loading.
+    
+    Args:
+        dataset: Dataset instance
+        batch_size: Batch size
+        shuffle: Whether to shuffle data
+        num_workers: Number of worker processes
+        pin_memory: Whether to pin memory (faster GPU transfer)
+        
+    Returns:
+        Configured DataLoader
+    """
+    return DataLoader(
+        dataset,
+        batch_size=batch_size,
+        shuffle=shuffle,
+        num_workers=num_workers,
+        pin_memory=pin_memory,
+        drop_last=shuffle
+    )
+```
+
+## Gradio Integration
+
+### Interactive Inference Interface
+
+```python
+import gradio as gr
+from typing import Tuple
+import numpy as np
+
+def create_inference_interface(
+    model,
+    tokenizer,
+    device: str = "cuda"
+) -> gr.Blocks:
+    """
+    Create a Gradio interface for model inference.
+    
+    Args:
+        model: Trained model for inference
+        tokenizer: Tokenizer for text processing
+        device: Device to run inference on
+        
+    Returns:
+        Gradio interface
+    """
+    
+    def predict(text: str, max_length: int = 100) -> str:
+        """
+        Generate predictions from input text.
+        
+        Args:
+            text: Input text
+            max_length: Maximum output length
+            
+        Returns:
+            Generated text
+        """
+        inputs = tokenizer(
+            text,
+            return_tensors="pt",
+            truncation=True
+        ).to(device)
+        
+        with torch.no_grad():
+            outputs = model.generate(
+                **inputs,
+                max_length=max_length,
+                num_beams=5,
+                early_stopping=True
+            )
+        
+        result = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        return result
+    
+    with gr.Blocks() as interface:
+        gr.Markdown("# Model Inference Interface")
+        
+        with gr.Row():
+            with gr.Column():
+                input_text = gr.Textbox(
+                    label="Input Text",
+                    placeholder="Enter text here...",
+                    lines=3
+                )
+                max_length = gr.Slider(
+                    minimum=10,
+                    maximum=500,
+                    value=100,
+                    label="Max Length"
+                )
+                submit_btn = gr.Button("Generate")
+            
+            with gr.Column():
+                output_text = gr.Textbox(
+                    label="Generated Output",
+                    lines=3,
+                    interactive=False
+                )
+        
+        submit_btn.click(
+            fn=predict,
+            inputs=[input_text, max_length],
+            outputs=output_text
+        )
+    
+    return interface
+```
+
+## Error Handling and Debugging
+
+### Comprehensive Error Handling
+
+```python
+import logging
+import traceback
+from typing import Callable, Any
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def safe_forward_pass(
+    model: nn.Module,
+    batch: dict,
+    device: str = "cuda"
+) -> Tuple[torch.Tensor, bool]:
+    """
+    Forward pass with anomaly detection and error handling.
+    
+    Args:
+        model: Model to run forward pass on
+        batch: Input batch
+        device: Device to run on
+        
+    Returns:
+        Tuple of (output, success_flag)
+    """
+    try:
+        # Enable anomaly detection during debugging
+        torch.autograd.set_detect_anomaly(True)
+        
+        batch = {k: v.to(device) for k, v in batch.items()}
+        
+        with torch.autocast(device_type="cuda", dtype=torch.float16):
+            outputs = model(**batch)
+        
+        # Check for NaN/Inf values
+        if torch.isnan(outputs.loss) or torch.isinf(outputs.loss):
+            logger.error("NaN or Inf detected in loss")
+            return None, False
+        
+        return outputs, True
+        
+    except RuntimeError as e:
+        logger.error(f"CUDA error: {str(e)}")
+        return None, False
+    except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}")
+        logger.error(traceback.format_exc())
+        return None, False
+```
+
+## Performance Optimization
+
+### Multi-GPU Training
+
+```python
+import torch.nn as nn
+from torch.nn.parallel import DataParallel, DistributedDataParallel
+
+def setup_multi_gpu_training(
+    model: nn.Module,
+    distributed: bool = False
+) -> nn.Module:
+    """
+    Setup model for multi-GPU training.
+    
+    Args:
+        model: Model to parallelize
+        distributed: Whether to use distributed data parallel
+        
+    Returns:
+        Wrapped model
+    """
+    if torch.cuda.device_count() > 1:
+        if distributed:
+            # For distributed training
+            model = DistributedDataParallel(model)
+            logger.info(f"Using DistributedDataParallel with {torch.cuda.device_count()} GPUs")
+        else:
+            # For single-machine multi-GPU
+            model = DataParallel(model)
+            logger.info(f"Using DataParallel with {torch.cuda.device_count()} GPUs")
+    
+    return model
+```
+
+### Memory Optimization Strategies
+
+```python
+def optimize_model_memory(model: nn.Module) -> None:
+    """
+    Apply memory optimization techniques to model.
+    
+    Args:
+        model: Model to optimize
+    """
+    # Enable gradient checkpointing if available
+    if hasattr(model, "gradient_checkpointing_enable"):
+        model.gradient_checkpointing_enable()
+        logger.info("Gradient checkpointing enabled")
+    
+    # Set to eval mode for inference to save memory
+    # model.eval()
+    
+    # Use memory efficient attention if available
+    if hasattr(model, "enable_memory_efficient_attention"):
+        model.enable_memory_efficient_attention()
+        logger.info("Memory efficient attention enabled")
+
+def get_model_size(model: nn.Module) -> Tuple[float, float]:
+    """
+    Calculate model size in MB (parameters and activations).
+    
+    Args:
+        model: PyTorch model
+        
+    Returns:
+        Tuple of (parameter_size_mb, trainable_param_size_mb)
+    """
+    total_params = sum(p.numel() for p in model.parameters())
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    
+    param_size = total_params * 4 / (1024 ** 2)  # 4 bytes per float32
+    trainable_size = trainable_params * 4 / (1024 ** 2)
+    
+    return param_size, trainable_size
+```
+
+## Configuration Management
+
+### YAML Configuration
+
+```python
+import yaml
+from dataclasses import dataclass, field
+from typing import Dict, Any
+
+@dataclass
+class ModelConfig:
+    """Model configuration."""
+    model_name: str
+    hidden_size: int
+    num_attention_heads: int
+    num_layers: int
+    dropout_rate: float = 0.1
+    attention_dropout: float = 0.1
+    
+    @classmethod
+    def from_yaml(cls, path: str) -> 'ModelConfig':
+        """Load configuration from YAML file."""
+        with open(path, 'r') as f:
+            config_dict = yaml.safe_load(f)
+        return cls(**config_dict)
+
+@dataclass
+class TrainingConfig:
+    """Training configuration."""
+    batch_size: int
+    learning_rate: float
+    num_epochs: int
+    warmup_steps: int
+    gradient_accumulation_steps: int = 1
+    max_grad_norm: float = 1.0
+    weight_decay: float = 0.01
+    
+    @classmethod
+    def from_yaml(cls, path: str) -> 'TrainingConfig':
+        """Load configuration from YAML file."""
+        with open(path, 'r') as f:
+            config_dict = yaml.safe_load(f)
+        return cls(**config_dict)
+```
+
+### Example training_config.yaml
+
+```yaml
+batch_size: 16
+learning_rate: 5e-5
+num_epochs: 3
+warmup_steps: 500
+gradient_accumulation_steps: 2
+max_grad_norm: 1.0
+weight_decay: 0.01
+```
+
+## Experiment Tracking
+
+### Using Weights & Biases
+
+```python
+import wandb
+from typing import Dict
+
+def init_wandb_tracking(
+    project: str,
+    config: Dict[str, Any],
+    name: str = None
+) -> None:
+    """
+    Initialize Weights & Biases tracking.
+    
+    Args:
+        project: Project name
+        config: Configuration dictionary
+        name: Run name
+    """
+    wandb.init(
+        project=project,
+        name=name,
+        config=config,
+        tags=["training", "deep-learning"]
+    )
+
+def log_training_metrics(
+    epoch: int,
+    train_loss: float,
+    val_loss: float,
+    learning_rate: float
+) -> None:
+    """Log training metrics to wandb."""
+    wandb.log({
+        "epoch": epoch,
+        "train_loss": train_loss,
+        "val_loss": val_loss,
+        "learning_rate": learning_rate
+    })
+```
+
+## Dependencies and Environment
+
+### requirements.txt
+```
+# Core deep learning
+torch>=2.0.0
+torchvision>=0.15.0
+torchaudio>=2.0.0
+
+# Transformers and LLMs
+transformers>=4.35.0
+peft>=0.7.0
+bitsandbytes>=0.41.0
+
+# Diffusion models
+diffusers>=0.24.0
+
+# Data processing
+datasets>=2.14.0
+tokenizers>=0.14.0
+
+# Gradio interface
+gradio>=4.0.0
+
+# Utilities
+numpy>=1.24.0
+tqdm>=4.66.0
+pyyaml>=6.0
+
+# Experiment tracking
+wandb>=0.15.0
+tensorboard>=2.14.0
+
+# Performance profiling
+py-spy>=0.3.14
+
+# Code quality
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.4.0
+pytest>=7.4.0
+```
+
+## Key Conventions and Workflow
+
+1. **Problem Definition First**
+   - Clearly define the problem and dataset
+   - Analyze dataset statistics and distributions
+   - Create data exploration notebooks
+
+2. **Modular Code Architecture**
+   - Separate concerns: models, data, training, inference
+   - Create reusable components
+   - Use configuration files for hyperparameters
+
+3. **Efficient Experimentation**
+   - Track all experiments with wandb
+   - Version control configurations
+   - Save and compare model checkpoints
+
+4. **Performance Optimization**
+   - Enable mixed precision training from the start
+   - Use gradient accumulation for large batches
+   - Profile code to identify bottlenecks
+   - Use appropriate scheduling and learning rates
+
+5. **Production Readiness**
+   - Implement proper error handling
+   - Add comprehensive logging
+   - Create model serving interfaces
+   - Version models and track lineage
+
+## Anti-Patterns to Avoid
+
+❌ **Don't train without gradient checkpointing on large models**
+```python
+# Bad: Out of memory on large models
+outputs = model(inputs)  # Stores all intermediate activations
+
+# Good: Use gradient checkpointing
+model.gradient_checkpointing_enable()
+```
+
+❌ **Don't ignore NaN/Inf values**
+```python
+# Bad: Silent failures
+loss = criterion(outputs, targets)
+optimizer.step()
+
+# Good: Detect anomalies
+torch.autograd.set_detect_anomaly(True)
+if torch.isnan(loss) or torch.isinf(loss):
+    logger.error("Loss is NaN/Inf")
+```
+
+❌ **Don't use DataParallel for distributed training**
+```python
+# Bad: Single machine multi-GPU
+model = nn.DataParallel(model)
+
+# Good: Distributed multi-GPU/multi-machine
+model = nn.DistributedDataParallel(model)
+```
+
+❌ **Don't compute gradients during inference**
+```python
+# Bad: Wastes memory
+outputs = model(inputs)
+
+# Good: Disable gradients
+with torch.no_grad():
+    outputs = model(inputs)
+```
+
+❌ **Don't hardcode hyperparameters**
+```python
+# Bad: Hardcoded values
+learning_rate = 1e-4
+batch_size = 32
+
+# Good: Configuration management
+config = TrainingConfig.from_yaml("config/training.yaml")
+```
+
+## Additional Resources
+
+- **PyTorch**: https://pytorch.org/docs/stable/index.html
+- **PyTorch Performance Guide**: https://pytorch.org/tutorials/recipes/recipes/tuning_guide.html
+- **Transformers**: https://huggingface.co/transformers/
+- **Diffusers**: https://huggingface.co/diffusers/
+- **Gradio**: https://www.gradio.app/
+- **Weights & Biases**: https://wandb.ai/site
+- **PEFT (Parameter-Efficient Fine-Tuning)**: https://huggingface.co/docs/peft
+- **DeepLearning.AI Courses**: https://www.deeplearning.ai/
+- **PyTorch Lightning**: https://www.pytorchlightning.ai/
