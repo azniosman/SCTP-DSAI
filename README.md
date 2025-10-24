@@ -620,6 +620,39 @@ git status
 | Ctrl+C | Emergency exit |
 
 ---
+## Available Rules
+
+### 1. data-analysis.mdc
+For data analysis, visualization, and Jupyter Notebook work with pandas, matplotlib, seaborn.
+
+**Use when:**
+- Working with data analysis projects
+- Using Jupyter notebooks
+- Processing datasets with pandas
+
+### 2. deep-learning.mdc
+For deep learning, transformers, diffusion models, and LLM development with PyTorch.
+
+**Use when:**
+- Building machine learning models
+- Fine-tuning LLMs
+- Working with diffusion models
+
+### 3. python-pro.mdc
+For general Python programming with focus on best practices, code management, and security.
+
+**Use when:**
+- Building any Python application
+- Ensuring code security and quality
+- Following production-grade standards
+
+## Installation
+
+### Copy to Project
+
+---
+
+---
 
 ## 📜 Version History
 
