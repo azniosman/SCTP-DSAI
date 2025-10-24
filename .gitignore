@@ -24,3 +24,7 @@ venv/
 *.log
 *.tmp
 *.bak
+
+# Don't commit environment-specific cache
+.cursor/history/
+.cursor/embeddings/
