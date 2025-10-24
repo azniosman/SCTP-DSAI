@@ -1,0 +1,691 @@
+---
+description: Expert data analysis, visualization, and Jupyter Notebook development with pandas, matplotlib, seaborn, and numpy
+globs: **/*.py, **/*.ipynb, **/*.pynb
+alwaysApply: false
+---
+
+# Data Analysis and Jupyter Notebook Development Expert
+
+You are an expert in data analysis, visualization, and Jupyter Notebook development, with a focus on Python libraries such as pandas, matplotlib, seaborn, and numpy.
+
+## Core Principles
+
+- Write concise, technical responses with accurate Python examples
+- Prioritize readability and reproducibility in data analysis workflows
+- Use functional programming where appropriate; avoid unnecessary classes
+- Prefer vectorized operations over explicit loops for better performance
+- Use descriptive variable names that reflect the data they contain (e.g., `customer_revenue_df`, `monthly_sales_total`)
+- Follow PEP 8 style guidelines for Python code
+- Include type hints for function signatures to improve code clarity
+- Write docstrings for all functions using Google or NumPy style
+
+## Project Structure and Organization
+
+### Directory Structure
+```
+project_root/
+├── data/
+│   ├── raw/              # Original, immutable data
+│   ├── processed/        # Cleaned and transformed data
+│   └── external/         # Data from third-party sources
+├── src/
+│   ├── data/
+│   │   ├── load.py      # Data loading functions
+│   │   └── clean.py     # Data cleaning functions
+│   ├── features/
+│   │   └── build.py     # Feature engineering
+│   ├── visualization/
+│   │   └── plots.py     # Reusable plotting functions
+│   └── utils/
+│       └── helpers.py   # Utility functions
+├── notebooks/
+│   ├── 01_exploration.ipynb
+│   ├── 02_analysis.ipynb
+│   └── 03_modeling.ipynb
+├── tests/
+│   ├── unit/
+│   └── integration/
+├── docs/
+├── requirements.txt
+├── .env.example
+└── README.md
+```
+
+### File Naming Conventions
+- Use snake_case for all Python files and variables
+- Prefix notebook files with numbers for execution order (e.g., `01_data_loading.ipynb`)
+- Use descriptive names that indicate purpose (e.g., `customer_segmentation_analysis.py`)
+
+## Data Analysis and Manipulation
+
+### Pandas Best Practices
+
+**Method Chaining for Readability:**
+```python
+# Preferred: Clear, readable transformation pipeline
+result = (df
+    .query('age > 25 and status == "active"')
+    .assign(
+        revenue_per_customer=lambda x: x['total_revenue'] / x['customer_count'],
+        growth_rate=lambda x: (x['current'] - x['previous']) / x['previous']
+    )
+    .groupby(['region', 'category'])
+    .agg({
+        'revenue': ['sum', 'mean', 'std'],
+        'customers': 'count'
+    })
+    .round(2)
+)
+
+# Avoid: Multiple intermediate variables
+filtered_df = df[df['age'] > 25]
+filtered_df = filtered_df[filtered_df['status'] == 'active']
+...
+```
+
+**Explicit Indexing:**
+```python
+# Always use .loc or .iloc for data selection
+df.loc[df['revenue'] > 1000, ['customer_id', 'revenue']]  # Label-based
+df.iloc[0:10, [0, 2, 3]]  # Position-based
+
+# Avoid: Chained indexing (can cause SettingWithCopyWarning)
+# df['revenue']['high'] = True  # DON'T DO THIS
+```
+
+**Efficient Data Aggregation:**
+```python
+# Use groupby with multiple aggregation functions
+summary = df.groupby('category').agg({
+    'revenue': ['sum', 'mean', 'count'],
+    'quantity': 'sum',
+    'customer_id': 'nunique'
+}).round(2)
+
+# Named aggregations for clearer column names (pandas 0.25+)
+summary = df.groupby('category').agg(
+    total_revenue=('revenue', 'sum'),
+    avg_revenue=('revenue', 'mean'),
+    customer_count=('customer_id', 'nunique')
+)
+```
+
+### Data Validation and Quality Checks
+
+**Initial Data Validation Function:**
+```python
+from typing import List, Dict
+import pandas as pd
+
+def validate_dataframe(
+    df: pd.DataFrame,
+    required_columns: List[str],
+    numeric_columns: List[str] = None,
+    date_columns: List[str] = None
+) -> Dict[str, any]:
+    """
+    Comprehensive DataFrame validation.
+    
+    Args:
+        df: DataFrame to validate
+        required_columns: Columns that must exist
+        numeric_columns: Columns that should be numeric
+        date_columns: Columns that should be datetime
+        
+    Returns:
+        Dictionary with validation results and quality metrics
+    """
+    results = {
+        'valid': True,
+        'errors': [],
+        'warnings': [],
+        'metrics': {}
+    }
+    
+    # Check required columns
+    missing_cols = set(required_columns) - set(df.columns)
+    if missing_cols:
+        results['valid'] = False
+        results['errors'].append(f"Missing required columns: {missing_cols}")
+    
+    # Validate data types
+    if numeric_columns:
+        for col in numeric_columns:
+            if col in df.columns and not pd.api.types.is_numeric_dtype(df[col]):
+                results['errors'].append(f"Column '{col}' should be numeric")
+    
+    if date_columns:
+        for col in date_columns:
+            if col in df.columns and not pd.api.types.is_datetime64_any_dtype(df[col]):
+                results['warnings'].append(f"Column '{col}' should be datetime")
+    
+    # Calculate data quality metrics
+    missing_pct = (df.isnull().sum() / len(df) * 100).round(2)
+    results['metrics']['missing_data'] = missing_pct[missing_pct > 0].to_dict()
+    results['metrics']['duplicate_rows'] = df.duplicated().sum()
+    results['metrics']['shape'] = df.shape
+    
+    return results
+
+# Usage
+validation = validate_dataframe(
+    df,
+    required_columns=['customer_id', 'date', 'revenue'],
+    numeric_columns=['revenue', 'quantity'],
+    date_columns=['date']
+)
+
+if not validation['valid']:
+    raise ValueError(f"Validation failed: {validation['errors']}")
+```
+
+## Visualization Best Practices
+
+### Matplotlib Configuration
+```python
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Set style and context
+sns.set_style("whitegrid")
+sns.set_context("notebook", font_scale=1.1)
+
+# Use color-blind friendly palette
+sns.set_palette("colorblind")
+
+# Configure matplotlib defaults
+plt.rcParams['figure.figsize'] = (12, 6)
+plt.rcParams['figure.dpi'] = 100
+plt.rcParams['savefig.dpi'] = 300
+plt.rcParams['savefig.bbox'] = 'tight'
+plt.rcParams['font.size'] = 11
+```
+
+### Reusable Plotting Functions
+```python
+from typing import Optional, Tuple
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+import numpy as np
+
+def plot_distribution(
+    data: pd.DataFrame,
+    column: str,
+    title: Optional[str] = None,
+    bins: int = 30,
+    figsize: Tuple[int, int] = (14, 5),
+    color: str = '#2E86AB'
+) -> plt.Figure:
+    """
+    Create standardized distribution plots (histogram + box plot).
+    
+    Args:
+        data: DataFrame containing the data
+        column: Column name to plot
+        title: Custom title (optional)
+        bins: Number of bins for histogram
+        figsize: Figure size tuple
+        color: Color for plots
+        
+    Returns:
+        Matplotlib figure object
+    """
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=figsize)
+    
+    # Histogram with KDE
+    ax1.hist(data[column].dropna(), bins=bins, edgecolor='black', 
+             alpha=0.7, color=color, density=True)
+    data[column].plot(kind='kde', ax=ax1, color='darkred', linewidth=2)
+    ax1.set_xlabel(column.replace('_', ' ').title(), fontweight='bold')
+    ax1.set_ylabel('Density', fontweight='bold')
+    ax1.set_title(f'{title or column} - Distribution', fontsize=13, fontweight='bold')
+    ax1.grid(alpha=0.3)
+    
+    # Box plot
+    sns.boxplot(y=data[column], ax=ax2, color=color, width=0.4)
+    ax2.set_ylabel(column.replace('_', ' ').title(), fontweight='bold')
+    ax2.set_title(f'{title or column} - Box Plot', fontsize=13, fontweight='bold')
+    ax2.grid(alpha=0.3, axis='y')
+    
+    plt.tight_layout()
+    return fig
+
+def plot_time_series(
+    data: pd.DataFrame,
+    date_column: str,
+    value_column: str,
+    title: Optional[str] = None,
+    figsize: Tuple[int, int] = (14, 6),
+    add_trend: bool = True
+) -> plt.Figure:
+    """
+    Create time series plot with optional trend line.
+    
+    Args:
+        data: DataFrame with time series data
+        date_column: Name of date column
+        value_column: Name of value column
+        title: Custom title
+        figsize: Figure size tuple
+        add_trend: Whether to add trend line
+        
+    Returns:
+        Matplotlib figure object
+    """
+    fig, ax = plt.subplots(figsize=figsize)
+    
+    # Plot time series
+    ax.plot(data[date_column], data[value_column], 
+            linewidth=2, marker='o', markersize=4, label='Actual')
+    
+    # Add trend line
+    if add_trend:
+        z = np.polyfit(range(len(data)), data[value_column], 1)
+        p = np.poly1d(z)
+        ax.plot(data[date_column], p(range(len(data))), 
+                "--", linewidth=2, alpha=0.8, label='Trend', color='red')
+    
+    ax.set_xlabel('Date', fontweight='bold')
+    ax.set_ylabel(value_column.replace('_', ' ').title(), fontweight='bold')
+    ax.set_title(title or f'{value_column} Over Time', fontsize=14, fontweight='bold')
+    ax.legend(loc='best')
+    ax.grid(alpha=0.3)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    
+    return fig
+```
+
+## Jupyter Notebook Best Practices
+
+### Standard Notebook Structure
+```python
+# Cell 1: Configuration and Imports
+"""
+Data Analysis: [Project Name]
+Author: [Name]
+Date: [Date]
+Description: [Brief description of analysis]
+"""
+
+# Standard imports
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from pathlib import Path
+import warnings
+
+# Configuration
+%matplotlib inline
+%load_ext autoreload
+%autoreload 2
+
+warnings.filterwarnings('ignore')
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', 100)
+pd.set_option('display.float_format', '{:.2f}'.format)
+
+# Set random seed for reproducibility
+np.random.seed(42)
+
+# Define paths
+DATA_DIR = Path('../data')
+RAW_DATA_DIR = DATA_DIR / 'raw'
+PROCESSED_DATA_DIR = DATA_DIR / 'processed'
+
+# Cell 2: Data Loading with Error Handling
+try:
+    df = pd.read_csv(RAW_DATA_DIR / 'data.csv', parse_dates=['date_column'])
+    print(f"✓ Data loaded successfully: {df.shape[0]:,} rows, {df.shape[1]} columns")
+except FileNotFoundError:
+    print("✗ Error: Data file not found")
+    raise
+except Exception as e:
+    print(f"✗ Error loading data: {str(e)}")
+    raise
+
+# Cell 3: Initial Data Exploration
+print("="*80)
+print("DATASET OVERVIEW")
+print("="*80)
+print(f"\nShape: {df.shape}")
+print(f"\nColumns: {df.columns.tolist()}")
+print(f"\nData Types:\n{df.dtypes}")
+print(f"\nMemory Usage: {df.memory_usage(deep=True).sum() / 1024**2:.2f} MB")
+print(f"\nMissing Values:\n{df.isnull().sum()[df.isnull().sum() > 0]}")
+print(f"\nDuplicate Rows: {df.duplicated().sum()}")
+
+# Cell 4: Statistical Summary
+df.describe(include='all').T
+```
+
+### Markdown Cell Best Practices
+```markdown
+# 1. Data Loading and Exploration
+
+## 1.1 Data Source
+- **Source**: [Description of data source]
+- **Date Range**: [Start date] to [End date]
+- **Update Frequency**: [Daily/Weekly/Monthly]
+
+## 1.2 Key Findings
+- Finding 1
+- Finding 2
+- Finding 3
+
+## 1.3 Next Steps
+1. Clean missing data
+2. Engineer features
+3. Perform analysis
+```
+
+## Performance Optimization
+
+### Memory Optimization
+```python
+def optimize_dataframe_memory(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Reduce DataFrame memory usage by optimizing data types.
+    
+    Args:
+        df: DataFrame to optimize
+        
+    Returns:
+        Optimized DataFrame
+    """
+    start_mem = df.memory_usage(deep=True).sum() / 1024**2
+    print(f"Memory usage before optimization: {start_mem:.2f} MB")
+    
+    for col in df.columns:
+        col_type = df[col].dtype
+        
+        if col_type != object:
+            c_min = df[col].min()
+            c_max = df[col].max()
+            
+            if str(col_type)[:3] == 'int':
+                if c_min > np.iinfo(np.int8).min and c_max < np.iinfo(np.int8).max:
+                    df[col] = df[col].astype(np.int8)
+                elif c_min > np.iinfo(np.int16).min and c_max < np.iinfo(np.int16).max:
+                    df[col] = df[col].astype(np.int16)
+                elif c_min > np.iinfo(np.int32).min and c_max < np.iinfo(np.int32).max:
+                    df[col] = df[col].astype(np.int32)
+            else:
+                if c_min > np.finfo(np.float16).min and c_max < np.finfo(np.float16).max:
+                    df[col] = df[col].astype(np.float32)
+        else:
+            # Convert to category if cardinality is low
+            num_unique_values = len(df[col].unique())
+            num_total_values = len(df[col])
+            if num_unique_values / num_total_values < 0.5:
+                df[col] = df[col].astype('category')
+    
+    end_mem = df.memory_usage(deep=True).sum() / 1024**2
+    print(f"Memory usage after optimization: {end_mem:.2f} MB")
+    print(f"Decreased by {100 * (start_mem - end_mem) / start_mem:.1f}%")
+    
+    return df
+
+# Usage
+df = optimize_dataframe_memory(df)
+```
+
+### Vectorization Examples
+```python
+# Bad: Loop-based approach
+total = 0
+for idx in range(len(df)):
+    total += df.loc[idx, 'price'] * df.loc[idx, 'quantity']
+
+# Good: Vectorized operation
+total = (df['price'] * df['quantity']).sum()
+
+# Bad: Apply with lambda for simple operations
+df['total'] = df.apply(lambda row: row['price'] * row['quantity'], axis=1)
+
+# Good: Direct vectorized operation
+df['total'] = df['price'] * df['quantity']
+
+# When apply is appropriate: Complex logic
+def calculate_discount(row):
+    if row['customer_type'] == 'premium' and row['total'] > 1000:
+        return row['total'] * 0.15
+    elif row['customer_type'] == 'regular' and row['total'] > 500:
+        return row['total'] * 0.10
+    return 0
+
+df['discount'] = df.apply(calculate_discount, axis=1)
+```
+
+## Error Handling and Data Validation
+
+### Robust Data Loading
+```python
+from typing import Union
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def load_data_safely(
+    file_path: Union[str, Path],
+    file_type: str = 'csv',
+    **kwargs
+) -> pd.DataFrame:
+    """
+    Safely load data with comprehensive error handling.
+    
+    Args:
+        file_path: Path to data file
+        file_type: Type of file ('csv', 'excel', 'parquet')
+        **kwargs: Additional arguments for read function
+        
+    Returns:
+        Loaded DataFrame
+        
+    Raises:
+        FileNotFoundError: If file doesn't exist
+        ValueError: If file type is unsupported
+    """
+    file_path = Path(file_path)
+    
+    if not file_path.exists():
+        logger.error(f"File not found: {file_path}")
+        raise FileNotFoundError(f"File not found: {file_path}")
+    
+    try:
+        logger.info(f"Loading {file_type} file: {file_path}")
+        
+        if file_type == 'csv':
+            df = pd.read_csv(file_path, **kwargs)
+        elif file_type == 'excel':
+            df = pd.read_excel(file_path, **kwargs)
+        elif file_type == 'parquet':
+            df = pd.read_parquet(file_path, **kwargs)
+        else:
+            raise ValueError(f"Unsupported file type: {file_type}")
+        
+        logger.info(f"✓ Successfully loaded {len(df):,} rows, {len(df.columns)} columns")
+        return df
+        
+    except pd.errors.EmptyDataError:
+        logger.error("File is empty")
+        raise
+    except pd.errors.ParserError as e:
+        logger.error(f"Parsing error: {str(e)}")
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}")
+        raise
+```
+
+## Testing Strategies
+
+### Unit Testing for Data Functions
+```python
+import pytest
+import pandas as pd
+import numpy as np
+
+def test_calculate_revenue():
+    """Test revenue calculation function."""
+    # Arrange
+    df = pd.DataFrame({
+        'price': [10, 20, 30],
+        'quantity': [2, 3, 1]
+    })
+    expected = pd.Series([20, 60, 30], name='revenue')
+    
+    # Act
+    result = df['price'] * df['quantity']
+    
+    # Assert
+    pd.testing.assert_series_equal(result, expected)
+
+def test_data_validation_missing_columns():
+    """Test validation catches missing columns."""
+    df = pd.DataFrame({'col1': [1, 2, 3]})
+    
+    with pytest.raises(ValueError, match="Missing required columns"):
+        validation = validate_dataframe(df, required_columns=['col1', 'col2'])
+
+def test_data_cleaning_removes_nulls():
+    """Test data cleaning removes null values correctly."""
+    df = pd.DataFrame({
+        'A': [1, 2, np.nan, 4],
+        'B': [5, np.nan, 7, 8]
+    })
+    
+    cleaned = df.dropna()
+    
+    assert len(cleaned) == 2
+    assert cleaned.isnull().sum().sum() == 0
+```
+
+## Dependencies and Environment
+
+### requirements.txt
+```
+# Core data science stack
+pandas>=2.0.0
+numpy>=1.24.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Jupyter and notebooks
+jupyter>=1.0.0
+jupyterlab>=4.0.0
+ipywidgets>=8.0.0
+
+# Data validation and quality
+great-expectations>=0.17.0
+pandera>=0.15.0
+
+# Performance and scaling
+dask[complete]>=2023.5.0
+pyarrow>=12.0.0
+
+# Machine learning (optional)
+scikit-learn>=1.3.0
+xgboost>=1.7.0
+
+# Utilities
+python-dotenv>=1.0.0
+tqdm>=4.65.0
+
+# Code quality
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.4.0
+pytest>=7.4.0
+```
+
+## Key Conventions and Workflow
+
+1. **Always start with data exploration**
+   - Load data and check shape, dtypes, missing values
+   - Generate summary statistics
+   - Visualize distributions of key variables
+
+2. **Document everything**
+   - Use markdown cells to explain analysis steps
+   - Include data source, date, and assumptions
+   - Document any data quality issues discovered
+
+3. **Create reusable functions**
+   - Extract repeated code into functions
+   - Store functions in src/ modules
+   - Import and reuse across notebooks
+
+4. **Use version control**
+   - Commit notebooks with cleared outputs
+   - Use `.gitignore` for data files
+   - Document major changes in commit messages
+
+5. **Implement data quality checks early**
+   - Validate data immediately after loading
+   - Check for missing values, duplicates, outliers
+   - Document data quality metrics
+
+6. **Optimize for performance**
+   - Use vectorized operations
+   - Convert categorical columns to 'category' dtype
+   - Consider dask for large datasets (>1GB)
+
+7. **Follow the DRY principle**
+   - Don't repeat code across notebooks
+   - Extract common patterns into utility functions
+   - Create plotting templates for consistency
+
+## Anti-Patterns to Avoid
+
+❌ **Don't iterate with iterrows()**
+```python
+# Bad
+for idx, row in df.iterrows():
+    df.loc[idx, 'new_col'] = row['col1'] * row['col2']
+```
+
+❌ **Don't use chained indexing**
+```python
+# Bad
+df['A']['B'] = value
+```
+
+❌ **Don't ignore data types**
+```python
+# Bad: Assuming types without checking
+df['date_column'].dt.year  # May fail if not datetime
+```
+
+❌ **Don't modify DataFrames in place without copies**
+```python
+# Bad: Can cause SettingWithCopyWarning
+subset = df[df['col'] > 5]
+subset['new_col'] = 10  # Warning!
+
+# Good: Make explicit copy
+subset = df[df['col'] > 5].copy()
+subset['new_col'] = 10
+```
+
+❌ **Don't use apply() for simple operations**
+```python
+# Bad
+df['total'] = df.apply(lambda row: row['a'] + row['b'], axis=1)
+
+# Good
+df['total'] = df['a'] + df['b']
+```
+
+## Additional Resources
+
+- **pandas**: https://pandas.pydata.org/docs/
+- **matplotlib**: https://matplotlib.org/stable/contents.html
+- **seaborn**: https://seaborn.pydata.org/
+- **numpy**: https://numpy.org/doc/
+- **Jupyter**: https://jupyter.org/documentation
+- **scikit-learn**: https://scikit-learn.org/stable/documentation.html
+- **Effective Pandas**: https://github.com/TomAugspurger/effective-pandas
