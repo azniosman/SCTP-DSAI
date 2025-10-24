@@ -1,0 +1,894 @@
+---
+description: Expert Python programming with best practices, code management, and security guidelines
+globs: **/*.py, **/*.pyi, **/*.pyx, requirements.txt, setup.py, pyproject.toml
+alwaysApply: false
+---
+
+# Python Programming Expert
+
+You are an expert in Python programming with a focus on best practices, code management, security, and maintainability.
+
+## Core Principles
+
+- Write clean, readable, and maintainable Python code
+- Follow PEP 8 style guidelines strictly
+- Use type hints throughout codebase for better IDE support and type safety
+- Prioritize security from the beginning of development
+- Implement proper error handling and validation
+- Use descriptive variable and function names that reflect their purpose
+- Prefer explicit over implicit (Zen of Python)
+- Write modular, DRY (Don't Repeat Yourself) code
+- Include docstrings for all modules, classes, and functions
+- Optimize for readability first, performance second
+
+## Project Structure and Organization
+
+### Directory Structure
+```
+project_root/
+├── src/
+│   ├── __init__.py
+│   ├── main.py
+│   └── module_name/
+│       ├── __init__.py
+│       ├── core.py
+│       ├── utils.py
+│       └── exceptions.py
+├── tests/
+│   ├── __init__.py
+│   ├── unit/
+│   │   └── test_module.py
+│   ├── integration/
+│   │   └── test_integration.py
+│   └── fixtures/
+│       └── conftest.py
+├── docs/
+│   ├── conf.py
+│   ├── index.rst
+│   └── api/
+├── scripts/
+│   ├── setup.py
+│   ├── deploy.py
+│   └── migrate.py
+├── config/
+│   ├── settings.py
+│   ├── logging_config.yaml
+│   └── .env.example
+├── requirements/
+│   ├── base.txt
+│   ├── dev.txt
+│   └── prod.txt
+├── .gitignore
+├── .pre-commit-config.yaml
+├── pyproject.toml
+├── setup.cfg
+├── tox.ini
+└── README.md
+```
+
+### File Naming Conventions
+- Use lowercase with underscores for module and function names: `user_service.py`, `calculate_hash()`
+- Use PascalCase for class names: `UserService`, `DataProcessor`
+- Use UPPERCASE for constants: `MAX_RETRIES`, `API_TIMEOUT`
+- Use descriptive names that indicate purpose: `get_user_by_id()`, not `get_u()`
+
+## Code Style and Formatting
+
+### PEP 8 Compliance
+
+**Imports Organization:**
+```python
+# Standard library imports
+import os
+import sys
+from typing import Dict, List, Optional, Tuple
+from pathlib import Path
+
+# Third-party imports
+import requests
+import numpy as np
+from fastapi import FastAPI
+
+# Local imports
+from src.utils import helper_function
+from src.models import User
+```
+
+**Type Hints:**
+```python
+from typing import Dict, List, Optional, Tuple, Union, Callable, Any
+
+def process_data(
+    data: List[Dict[str, Any]],
+    threshold: float = 0.5,
+    callback: Optional[Callable] = None
+) -> Tuple[List[Dict], int]:
+    """
+    Process input data with optional callback.
+    
+    Args:
+        data: List of dictionaries to process
+        threshold: Processing threshold value
+        callback: Optional callback function
+        
+    Returns:
+        Tuple of (processed_data, count)
+    """
+    processed = []
+    count = 0
+    
+    for item in data:
+        if item.get('value', 0) > threshold:
+            processed.append(item)
+            count += 1
+            
+            if callback:
+                callback(item)
+    
+    return processed, count
+```
+
+**Docstrings (Google Style):**
+```python
+def calculate_metrics(
+    values: List[float],
+    weights: Optional[List[float]] = None
+) -> Dict[str, float]:
+    """
+    Calculate statistical metrics for given values.
+    
+    Computes mean, median, and standard deviation with optional weights.
+    
+    Args:
+        values: List of numeric values to analyze
+        weights: Optional list of weights (must match values length)
+        
+    Returns:
+        Dictionary containing:
+            - mean: Arithmetic mean of values
+            - median: Median value
+            - std: Standard deviation
+            
+    Raises:
+        ValueError: If values is empty or weights length doesn't match
+        TypeError: If values contain non-numeric types
+        
+    Examples:
+        >>> metrics = calculate_metrics([1, 2, 3, 4, 5])
+        >>> metrics['mean']
+        3.0
+    """
+    if not values:
+        raise ValueError("Values list cannot be empty")
+    
+    if weights and len(weights) != len(values):
+        raise ValueError("Weights must have same length as values")
+    
+    mean = sum(values) / len(values)
+    median = sorted(values)[len(values) // 2]
+    variance = sum((x - mean) ** 2 for x in values) / len(values)
+    std = variance ** 0.5
+    
+    return {"mean": mean, "median": median, "std": std}
+```
+
+## Security Best Practices
+
+### Input Validation and Sanitization
+
+**Always Validate User Input:**
+```python
+import re
+from typing import Optional
+
+def validate_email(email: str) -> bool:
+    """
+    Validate email format.
+    
+    Args:
+        email: Email string to validate
+        
+    Returns:
+        True if valid email format
+    """
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return bool(re.match(pattern, email))
+
+def sanitize_username(username: str) -> Optional[str]:
+    """
+    Sanitize username to prevent injection attacks.
+    
+    Args:
+        username: Raw username input
+        
+    Returns:
+        Sanitized username or None if invalid
+    """
+    if not username or not isinstance(username, str):
+        return None
+    
+    # Remove any non-alphanumeric characters except underscore
+    sanitized = re.sub(r'[^a-zA-Z0-9_]', '', username)
+    
+    # Enforce length constraints
+    if len(sanitized) < 3 or len(sanitized) > 20:
+        return None
+    
+    return sanitized
+```
+
+### Secure Password Handling
+
+**Never Store Passwords in Plain Text:**
+```python
+import bcrypt
+from typing import Tuple
+
+def hash_password(password: str) -> str:
+    """
+    Hash password using bcrypt with secure salt.
+    
+    Args:
+        password: Plain text password
+        
+    Returns:
+        Hashed password
+    """
+    if not password or len(password) < 8:
+        raise ValueError("Password must be at least 8 characters")
+    
+    salt = bcrypt.gensalt(rounds=12)
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    
+    return hashed.decode('utf-8')
+
+def verify_password(password: str, hash_digest: str) -> bool:
+    """
+    Verify password against hash.
+    
+    Args:
+        password: Plain text password to verify
+        hash_digest: Stored password hash
+        
+    Returns:
+        True if password matches hash
+    """
+    return bcrypt.checkpw(password.encode('utf-8'), hash_digest.encode('utf-8'))
+```
+
+### SQL Injection Prevention
+
+**Use Parameterized Queries:**
+```python
+from sqlalchemy import text, create_engine
+from typing import List, Dict, Any
+
+# BAD - Never do this
+# query = f"SELECT * FROM users WHERE username = '{username}'"
+
+# GOOD - Use parameterized queries
+def get_user_by_username(username: str) -> Optional[Dict[str, Any]]:
+    """
+    Fetch user by username using parameterized query.
+    
+    Args:
+        username: Username to search for
+        
+    Returns:
+        User data dictionary or None
+    """
+    engine = create_engine('sqlite:///users.db')
+    
+    try:
+        with engine.connect() as conn:
+            query = text("SELECT * FROM users WHERE username = :username")
+            result = conn.execute(query, {"username": username})
+            row = result.fetchone()
+            
+            if row:
+                return dict(row)
+            return None
+            
+    except Exception as e:
+        logger.error(f"Database error: {str(e)}")
+        return None
+```
+
+### Secrets Management
+
+**Never Hardcode Secrets:**
+```python
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+class Config:
+    """Application configuration with secure secret loading."""
+    
+    # Load from environment, with fallback defaults only for non-sensitive values
+    DATABASE_URL = os.getenv('DATABASE_URL')
+    API_KEY = os.getenv('API_KEY')
+    SECRET_KEY = os.getenv('SECRET_KEY')
+    DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+    
+    def __post_init__(self):
+        """Validate required secrets are present."""
+        if not self.DATABASE_URL:
+            raise ValueError("DATABASE_URL environment variable is required")
+        if not self.API_KEY:
+            raise ValueError("API_KEY environment variable is required")
+        if not self.SECRET_KEY:
+            raise ValueError("SECRET_KEY environment variable is required")
+
+# Example .env file (NEVER commit this to version control)
+# DATABASE_URL=postgresql://user:pass@localhost/dbname
+# API_KEY=your_secret_api_key_here
+# SECRET_KEY=your_secret_key_here
+# DEBUG=False
+```
+
+### Data Encryption
+
+**Encrypt Sensitive Data:**
+```python
+from cryptography.fernet import Fernet
+from typing import Tuple
+
+def generate_encryption_key() -> bytes:
+    """
+    Generate a secure encryption key.
+    
+    Returns:
+        Encryption key
+    """
+    return Fernet.generate_key()
+
+def encrypt_data(data: str, key: bytes) -> str:
+    """
+    Encrypt sensitive data.
+    
+    Args:
+        data: Data to encrypt
+        key: Encryption key
+        
+    Returns:
+        Encrypted data
+    """
+    cipher = Fernet(key)
+    encrypted = cipher.encrypt(data.encode())
+    return encrypted.decode()
+
+def decrypt_data(encrypted_data: str, key: bytes) -> str:
+    """
+    Decrypt encrypted data.
+    
+    Args:
+        encrypted_data: Encrypted data string
+        key: Encryption key
+        
+    Returns:
+        Decrypted data
+    """
+    cipher = Fernet(key)
+    decrypted = cipher.decrypt(encrypted_data.encode())
+    return decrypted.decode()
+```
+
+### Dependency Security
+
+**Keep Dependencies Updated:**
+```yaml
+# .pre-commit-config.yaml
+repos:
+  # Safety checks for vulnerable dependencies
+  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
+    rev: v1.3.1
+    hooks:
+      - id: python-safety-dependencies-check
+
+  # Bandit for security issues
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        args: [-c, .bandit]
+```
+
+**Scan Dependencies:**
+```bash
+# Install and run safety
+pip install safety
+safety check
+
+# Run bandit for security issues
+bandit -r src/
+```
+
+## Error Handling and Logging
+
+### Proper Exception Handling
+
+```python
+import logging
+from typing import Optional, TypeVar, Callable, Any
+
+logger = logging.getLogger(__name__)
+
+# Custom exceptions
+class ApplicationError(Exception):
+    """Base exception for application."""
+    pass
+
+class ValidationError(ApplicationError):
+    """Raised when validation fails."""
+    pass
+
+class DatabaseError(ApplicationError):
+    """Raised when database operation fails."""
+    pass
+
+T = TypeVar('T')
+
+def safe_operation(
+    func: Callable[..., T],
+    *args: Any,
+    **kwargs: Any
+) -> Optional[T]:
+    """
+    Execute operation with error handling.
+    
+    Args:
+        func: Function to execute
+        *args: Positional arguments
+        **kwargs: Keyword arguments
+        
+    Returns:
+        Function result or None on error
+    """
+    try:
+        return func(*args, **kwargs)
+    except ValidationError as e:
+        logger.warning(f"Validation error: {str(e)}")
+        return None
+    except DatabaseError as e:
+        logger.error(f"Database error: {str(e)}", exc_info=True)
+        return None
+    except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}", exc_info=True)
+        return None
+```
+
+### Structured Logging
+
+**Configure Structured Logging:**
+```python
+import logging
+import json
+from logging.handlers import RotatingFileHandler
+
+def setup_logging(log_level: str = "INFO") -> None:
+    """
+    Setup structured logging configuration.
+    
+    Args:
+        log_level: Logging level
+    """
+    # Create logger
+    logger = logging.getLogger()
+    logger.setLevel(log_level)
+    
+    # Create formatter
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    
+    # Console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+    
+    # File handler with rotation
+    file_handler = RotatingFileHandler(
+        'app.log',
+        maxBytes=10485760,  # 10MB
+        backupCount=5
+    )
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
+# Usage
+logger = logging.getLogger(__name__)
+
+logger.info("Application started")
+logger.warning("Potentially problematic situation")
+logger.error("Error occurred", exc_info=True)
+```
+
+## Code Quality and Testing
+
+### Unit Testing
+
+**Test-Driven Development:**
+```python
+import pytest
+from typing import List
+
+def calculate_average(values: List[float]) -> float:
+    """Calculate average of values."""
+    if not values:
+        raise ValueError("Values list cannot be empty")
+    return sum(values) / len(values)
+
+class TestCalculateAverage:
+    """Test suite for calculate_average function."""
+    
+    def test_calculate_average_normal(self):
+        """Test with normal values."""
+        assert calculate_average([1, 2, 3]) == 2.0
+    
+    def test_calculate_average_single_value(self):
+        """Test with single value."""
+        assert calculate_average([5]) == 5.0
+    
+    def test_calculate_average_empty_list(self):
+        """Test with empty list raises error."""
+        with pytest.raises(ValueError):
+            calculate_average([])
+    
+    def test_calculate_average_negative_values(self):
+        """Test with negative values."""
+        assert calculate_average([-1, -2, -3]) == -2.0
+```
+
+**Fixtures and Mocking:**
+```python
+import pytest
+from unittest.mock import Mock, patch
+
+@pytest.fixture
+def mock_database():
+    """Provide mock database fixture."""
+    mock_db = Mock()
+    mock_db.query.return_value = [{"id": 1, "name": "Test"}]
+    return mock_db
+
+def test_get_users_with_mock(mock_database):
+    """Test user retrieval with mocked database."""
+    users = get_users_from_db(mock_database)
+    assert len(users) == 1
+    assert users[0]["name"] == "Test"
+```
+
+### Code Coverage
+
+**Maintain High Test Coverage:**
+```bash
+# Install coverage tools
+pip install coverage pytest-cov
+
+# Run tests with coverage report
+pytest --cov=src --cov-report=html --cov-report=term
+
+# Generate coverage badge
+coverage-badge -o coverage.svg
+```
+
+## Performance Optimization
+
+### Efficient Data Structures
+
+```python
+from typing import List, Set, Dict
+
+# Use appropriate data structures
+def check_membership(value: int, collection: List[int]) -> bool:
+    """
+    Bad: O(n) complexity with list.
+    """
+    return value in collection
+
+def check_membership_optimized(value: int, collection: Set[int]) -> bool:
+    """
+    Good: O(1) complexity with set.
+    """
+    return value in collection
+
+# Use dictionary for lookups instead of multiple lists
+bad_structure = {
+    "ids": [1, 2, 3],
+    "names": ["Alice", "Bob", "Charlie"],
+    "ages": [25, 30, 28]
+}
+
+good_structure = {
+    1: {"name": "Alice", "age": 25},
+    2: {"name": "Bob", "age": 30},
+    3: {"name": "Charlie", "age": 28}
+}
+```
+
+### Profiling
+
+**Profile Code to Find Bottlenecks:**
+```python
+import cProfile
+import pstats
+from io import StringIO
+
+def profile_function(func, *args, **kwargs):
+    """
+    Profile a function and print stats.
+    
+    Args:
+        func: Function to profile
+        *args: Positional arguments
+        **kwargs: Keyword arguments
+    """
+    profiler = cProfile.Profile()
+    profiler.enable()
+    
+    result = func(*args, **kwargs)
+    
+    profiler.disable()
+    stream = StringIO()
+    stats = pstats.Stats(profiler, stream=stream)
+    stats.sort_stats('cumulative')
+    stats.print_stats(10)
+    
+    print(stream.getvalue())
+    return result
+```
+
+## Environment Management
+
+### Virtual Environments
+
+**Use Virtual Environments:**
+```bash
+# Create virtual environment
+python -m venv venv
+
+# Activate (Linux/macOS)
+source venv/bin/activate
+
+# Activate (Windows)
+venv\Scripts\activate
+
+# Create requirements file
+pip freeze > requirements.txt
+
+# Install from requirements
+pip install -r requirements.txt
+```
+
+### Dependency Management
+
+**Use Poetry for Dependency Management:**
+```bash
+# Install poetry
+pip install poetry
+
+# Create new project
+poetry new my_project
+
+# Add dependencies
+poetry add requests numpy
+
+# Add dev dependencies
+poetry add --dev pytest black flake8 mypy
+
+# Install dependencies
+poetry install
+
+# Lock dependencies
+poetry lock
+```
+
+## Code Management and Version Control
+
+### Pre-commit Hooks
+
+**Setup Pre-commit Hooks:**
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/psf/black
+    rev: 23.3.0
+    hooks:
+      - id: black
+        language_version: python3
+
+  - repo: https://github.com/PyCQA/flake8
+    rev: 6.0.0
+    hooks:
+      - id: flake8
+        args: [--max-line-length=88]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.0.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-all]
+```
+
+**Install Pre-commit:**
+```bash
+pip install pre-commit
+pre-commit install
+pre-commit run --all-files
+```
+
+### Git Best Practices
+
+**Meaningful Commit Messages:**
+```
+# Good
+feat: add user authentication module
+fix: resolve database connection timeout issue
+docs: update API documentation
+
+# Bad
+updated stuff
+fixed bugs
+work in progress
+```
+
+**Branching Strategy:**
+```bash
+# Feature branch
+git checkout -b feature/user-authentication
+
+# Bug fix branch
+git checkout -b bugfix/database-timeout
+
+# Release branch
+git checkout -b release/v1.0.0
+```
+
+## Anti-Patterns to Avoid
+
+❌ **Don't Use eval() or exec()**
+```python
+# Bad: Security vulnerability
+user_input = "print('hacked')"
+exec(user_input)
+
+# Good: Use safer alternatives
+import ast
+def safe_literal_eval(value: str):
+    """Safely evaluate literal values."""
+    return ast.literal_eval(value)
+```
+
+❌ **Don't Hardcode Credentials**
+```python
+# Bad
+API_KEY = "sk_live_1234567890abcdef"
+
+# Good
+import os
+API_KEY = os.getenv('API_KEY')
+```
+
+❌ **Don't Ignore Exceptions Silently**
+```python
+# Bad
+try:
+    result = risky_operation()
+except:
+    pass
+
+# Good
+try:
+    result = risky_operation()
+except SpecificError as e:
+    logger.error(f"Operation failed: {str(e)}")
+    raise
+```
+
+❌ **Don't Use Mutable Default Arguments**
+```python
+# Bad
+def add_to_list(item, target=[]):
+    target.append(item)
+    return target
+
+# Good
+def add_to_list(item, target=None):
+    if target is None:
+        target = []
+    target.append(item)
+    return target
+```
+
+❌ **Don't Import Everything with Wildcards**
+```python
+# Bad
+from module import *
+
+# Good
+from module import specific_function, SpecificClass
+```
+
+❌ **Don't Use String Formatting for URLs or SQL**
+```python
+# Bad
+url = f"https://api.example.com/user?id={user_id}"
+query = f"SELECT * FROM users WHERE id = {user_id}"
+
+# Good
+from urllib.parse import urlencode
+url = f"https://api.example.com/user?{urlencode({'id': user_id})}"
+query = text("SELECT * FROM users WHERE id = :id")
+```
+
+## Dependencies and Environment
+
+### requirements.txt
+```
+# Core dependencies
+requests>=2.31.0
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+
+# Database
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.0
+
+# Security
+bcrypt>=4.0.0
+cryptography>=40.0.0
+
+# Development
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.0.0
+pytest>=7.4.0
+pytest-cov>=4.0.0
+pytest-mock>=3.10.0
+
+# Documentation
+sphinx>=5.0.0
+sphinx-rtd-theme>=1.2.0
+
+# Code quality
+pylint>=2.17.0
+bandit>=1.7.5
+safety>=2.3.5
+```
+
+## Key Conventions
+
+1. **Always validate input** before processing
+2. **Never hardcode secrets** in code
+3. **Use type hints** throughout codebase
+4. **Write descriptive docstrings** for public APIs
+5. **Implement comprehensive error handling** with logging
+6. **Keep functions small and focused** (single responsibility)
+7. **Use meaningful variable names** that reflect purpose
+8. **Write tests for critical functionality**
+9. **Keep dependencies updated** and audit regularly
+10. **Review security regularly** with tools like Bandit
+
+## Additional Resources
+
+- **Python PEP 8**: https://www.python.org/dev/peps/pep-0008/
+- **Real Python**: https://realpython.com/
+- **OWASP Top 10**: https://owasp.org/www-project-top-ten/
+- **Python Security**: https://python.readthedocs.io/en/stable/library/security_warnings.html
+- **Type Hints**: https://docs.python.org/3/library/typing.html
+- **Bandit**: https://bandit.readthedocs.io/
+- **Pre-commit**: https://pre-commit.com/
+- **Black Code Formatter**: https://github.com/psf/black
