@@ -4,7 +4,7 @@
 - **Lesson Number**: 1_5
 - **Source Repository**: https://github.com/azniosman/5m-data-1.5-sql-advanced.git
 - **Added Date**: 2025-10-17
-- **Last Synced**: 2025-10-21
+- **Last Synced**: 2025-10-30
 
 ## Preserved Files
 Files matching these patterns are preserved during syncs:
