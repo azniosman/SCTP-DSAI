@@ -1,6 +1,21 @@
 # SCTP-DSAI Lessons Repository
 
-This repository contains all 28 SCTP-DSAI course lessons with automatic syncing and change preservation.
+This repository contains all 28 SCTP-DSAI course lessons with automatic syncing and a dedicated workspace for your custom work.
+
+## 📁 Repository Structure
+
+```
+SCTP-DSAI/
+├── lessons/              ← Course materials (READ ONLY - syncs from upstream)
+└── my-work/             ← YOUR WORKSPACE (all custom work goes here)
+    ├── notes/           ← Study notes and documentation
+    ├── assignments/     ← Assignment solutions
+    ├── projects/        ← Custom projects
+    ├── experiments/     ← Code experiments
+    └── coaching/        ← Coaching materials
+```
+
+**Important:** Always work in `my-work/` folder. The `lessons/` folder is for reference only and syncs automatically from source repositories.
 
 ## 🎯 Management System
 
@@ -43,13 +58,29 @@ chmod +x dsai_management.py
 
 ## 🚀 Working with Lessons
 
-### Create Your Local Copy (Preserved During Sync!)
+### Recommended Workflow: Use `my-work/` Folder
+
+```bash
+# Copy lesson materials to your workspace
+cp lessons/lesson1_7_intro_pandas/notebooks/pandas_lesson.ipynb \
+   my-work/experiments/pandas_lesson.ipynb
+
+# Work on your copy
+jupyter notebook my-work/experiments/pandas_lesson.ipynb
+
+# Or take notes
+nano my-work/notes/lesson-1-7-pandas-notes.md
+```
+
+### Alternative: Local Copies in Lessons (Auto-Preserved)
+
+If you prefer to work directly in lesson folders, create `.local` copies:
 
 ```bash
 # Navigate to a lesson
 cd lessons/lesson1_7_intro_pandas
 
-# Create your local version (will be preserved!)
+# Create your local version (will be preserved during sync!)
 cp notebook.ipynb notebook.local.ipynb
 
 # Work on your version
@@ -64,6 +95,14 @@ Files matching these patterns are **automatically preserved** during sync:
 - `my-*` → `my-solutions.py` ✓
 - `*-custom.*` → `config-custom.json` ✓
 - `custom-*/` → `custom-scripts/` ✓
+
+### Workspace Benefits
+
+**Why use `my-work/`?**
+- ✅ No sync conflicts - completely separate from lesson updates
+- ✅ Organized by purpose - notes, assignments, projects, experiments
+- ✅ Git-ignored - won't interfere with repository updates
+- ✅ Safe experimentation - modify anything without breaking lessons
 
 ---
 
@@ -325,13 +364,17 @@ Search by keyword across all lessons:
 #    - Type: "machine learning" (or today's topic)
 #    - Note the lesson folder
 
-# 3. Navigate to lesson
+# 3. Copy to your workspace
+cp lessons/lesson3_2_intro_machine_learning/notebooks/*.ipynb \
+   my-work/experiments/
+
+# 4. Start learning!
+cd my-work/experiments
+jupyter notebook
+
+# Alternative: Work directly in lessons with .local copy
 cd lessons/lesson3_2_intro_machine_learning
-
-# 4. Create local copy
 cp notebook.ipynb notebook.local.ipynb
-
-# 5. Start learning!
 jupyter notebook notebook.local.ipynb
 ```
 
@@ -417,7 +460,14 @@ SCTP-DSAI/
 ├── dsai_management.py          # Main application (1,097 lines)
 ├── README.md                   # This file
 ├── lessons-metadata.json       # Repository metadata
-├── lessons/                    # All 28 lessons
+├── .gitignore                  # Git exclusions (includes my-work/)
+├── my-work/                    # Your workspace (git-ignored)
+│   ├── notes/                  # Study notes
+│   ├── assignments/            # Assignment solutions
+│   ├── projects/               # Custom projects
+│   ├── experiments/            # Code experiments
+│   └── coaching/               # Coaching materials
+├── lessons/                    # All 28 lessons (READ ONLY)
 │   ├── lesson1_1_intro_data_science/
 │   ├── lesson1_2_intro_database/
 │   └── ...
@@ -483,27 +533,53 @@ python3 --version  # Should be 3.7 or higher
 2. Verify file names match preservation patterns
 3. Use proper naming conventions (*.local.*, my-*, etc.)
 
+### Duplicate Files Appearing (iCloud Issue)
+
+**If you see files with (1), (2) suffixes:**
+```bash
+# Your repo may be in iCloud causing sync conflicts
+# Recommended: Move repo out of iCloud
+mv ~/Library/Mobile\ Documents/com~apple~CloudDocs/NTU/SCTP-DSAI \
+   ~/Documents/SCTP-DSAI
+
+# Or run cleanup if duplicates appear
+find lessons -name "*([0-9])*" -delete
+git restore lessons/
+```
+
+**Prevention:**
+- Repository is best kept outside iCloud
+- Avoid opening on multiple devices simultaneously
+- The .gitignore now blocks common duplicate patterns
+
 ---
 
 ## 📋 Best Practices
 
 ### File Management
-1. **Always create local copies** before modifying
+1. **Work in my-work/ folder** (recommended)
+   ```bash
+   # Copy lesson materials to your workspace
+   cp lessons/lesson1_7_intro_pandas/notebooks/*.ipynb my-work/experiments/
+
+   # Create notes
+   nano my-work/notes/lesson-notes.md
+
+   # Build projects
+   mkdir my-work/projects/my-data-analysis
+   ```
+
+2. **Alternative: Use .local copies** in lessons
    ```bash
    cp original.ipynb original.local.ipynb
    ```
 
-2. **Use consistent naming** for custom files
-   ```bash
-   my-solutions.py
-   notebook.local.ipynb
-   config-custom.json
-   ```
+3. **Never modify lesson files directly** - they will be overwritten during sync
 
-3. **Organize custom work** in dedicated directories
+4. **Backup my-work/ regularly** - it's git-ignored so not backed up by git
    ```bash
-   mkdir custom-scripts
-   mkdir custom-data
+   # Example: backup to external drive or cloud
+   cp -r my-work/ ~/Dropbox/DSAI-backup/
    ```
 
 ### Sync Operations
@@ -569,6 +645,15 @@ Manual trigger: Go to Actions tab → Sync Lessons → Run workflow
 
 ### Common Questions
 
+**Q: Where should I do my work?**
+Always work in the `my-work/` folder. Copy lesson materials there first.
+
+**Q: What happens to my work when I sync?**
+Work in `my-work/` is completely safe and never touched by sync operations.
+
+**Q: Can I modify lesson files directly?**
+Not recommended - they'll be overwritten. Use `my-work/` or create `.local` copies.
+
 **Q: How do I update the management system?**
 ```bash
 git pull origin main
@@ -586,6 +671,9 @@ Edit `lessons-metadata.json` → `preservation_patterns` array
 **Q: Where are my backups stored?**
 In `.custom-changes/backup-[timestamp]/` within each lesson folder
 
+**Q: Should I commit my-work/ to git?**
+No, it's git-ignored by default. Backup externally if needed.
+
 ---
 
 ## 🚀 Quick Reference
@@ -596,17 +684,23 @@ In `.custom-changes/backup-[timestamp]/` within each lesson folder
 # Launch management system
 ./dsai_management.py
 
+# Copy lesson to your workspace
+cp lessons/lesson1_7_intro_pandas/notebooks/*.ipynb my-work/experiments/
+
 # Sync all lessons (script)
 ./scripts/sync-lesson.sh --all
 
 # Sync one lesson (script)
 ./scripts/sync-lesson.sh lesson1_7_intro_pandas
 
-# Create local copy
+# Create local copy in lesson folder (auto-protected)
 cp notebook.ipynb notebook.local.ipynb
 
-# Check what's modified
+# Check repository status
 git status
+
+# View your custom work
+ls -la my-work/
 ```
 
 ### Keyboard Shortcuts
@@ -656,7 +750,14 @@ For general Python programming with focus on best practices, code management, an
 
 ## 📜 Version History
 
-### v1.0.0 (Current)
+### v1.1.0 (2025-11-03)
+- ✅ Added `my-work/` dedicated workspace folder
+- ✅ Cleaned up 407 duplicate files from iCloud sync
+- ✅ Enhanced .gitignore for duplicate file protection
+- ✅ Improved workflow documentation
+- ✅ Separated course materials from custom work
+
+### v1.0.0
 - ✅ Beautiful menu-driven interface
 - ✅ Browse all 28 lessons by module
 - ✅ Smart sync with file preservation
