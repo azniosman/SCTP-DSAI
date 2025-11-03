@@ -4,7 +4,7 @@
 - **Lesson Number**: 3_6
 - **Source Repository**: https://github.com/azniosman/5m-data-3.6-time-series-forecasting.git
 - **Added Date**: 2025-10-17
-- **Last Synced**: 2025-10-30
+- **Last Synced**: 2025-11-03
 
 ## Preserved Files
 Files matching these patterns are preserved during syncs:
