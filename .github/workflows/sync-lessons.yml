@@ -1,4 +1,6 @@
 name: Sync Lessons (Preserve Changes)
+permissions:
+  contents: write
 
 on:
   schedule:
